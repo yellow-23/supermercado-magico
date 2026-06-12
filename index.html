@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>La Mision del Supermercado Magico</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', 'Comic Sans MS', cursive;
+      min-height: 100vh;
+      user-select: none;
+      touch-action: none;
+      overflow-x: hidden;
+    }
+
+    /* ======================================================
+       START SCREEN
+    ====================================================== */
+    #start-screen {
+      min-height: 100vh;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 30% 60%, #1976D2, #0D47A1 70%);
+      padding: 20px;
+      gap: 16px;
+    }
+
+    /* SVG plant decorations */
+    .deco {
+      position: absolute;
+      pointer-events: none;
+    }
+    .deco-br { bottom: 0; right: 0; }
+    .deco-bl { bottom: 0; left: 0; }
+    .deco-tr { top: 0; right: 0; }
+    .deco-tl { top: 0; left: 0; }
+
+    /* Bubbles */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.06);
+      pointer-events: none;
+    }
+
+    .start-cart {
+      font-size: 5.5rem;
+      animation: floatCart 3s ease-in-out infinite alternate;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes floatCart {
+      from { transform: translateY(0) rotate(-4deg); }
+      to   { transform: translateY(-16px) rotate(4deg); }
+    }
+
+    .start-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 3rem;
+      line-height: 1.1;
+      color: white;
+      text-shadow: 3px 5px 0 rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .title-yellow { color: #FFD54F; }
+    .title-teal   { color: #80DEEA; }
+
+    .start-sub {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.85);
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+    }
+
+    .level-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .level-pill {
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.4);
+      border-radius: 20px;
+      padding: 6px 14px;
+      color: white;
+      font-size: .82rem;
+      font-weight: 700;
+      backdrop-filter: blur(4px);
+    }
+
+    .btn-start {
+      background: #26C6DA;
+      color: white;
+      border: 4px solid rgba(255,255,255,0.5);
+      border-radius: 50px;
+      padding: 14px 50px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #00838F, 0 10px 20px rgba(0,0,0,0.25);
+      transition: transform .1s, box-shadow .1s;
+      position: relative;
+      z-index: 1;
+      letter-spacing: .5px;
+    }
+
+    .btn-start:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #00838F, 0 4px 10px rgba(0,0,0,0.25);
+    }
+
+    /* ======================================================
+       GAME SCREEN
+    ====================================================== */
+    #game-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      background: #FFF8F0;
+      padding: 14px;
+      gap: 12px;
+    }
+
+    .game-inner {
+      width: 100%;
+      max-width: 700px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Store sign header */
+    .store-header {
+      background: #1565C0;
+      border-radius: 20px;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: 0 5px 0 #0D47A1, 0 8px 20px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+    }
+
+    .store-flag {
+      background: #FFD54F;
+      padding: 12px 16px;
+      font-family: 'Fredoka One', cursive;
+      font-size: .85rem;
+      color: #5D4037;
+      white-space: nowrap;
+    }
+
+    .store-name {
+      flex: 1;
+      text-align: center;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem;
+      color: white;
+      letter-spacing: .5px;
+    }
+
+    .store-score {
+      background: rgba(255,255,255,0.15);
+      padding: 12px 16px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem;
+      color: #FFD54F;
+      white-space: nowrap;
+    }
+
+    /* Level info card */
+    .level-card {
+      background: white;
+      border-radius: 18px;
+      padding: 14px 18px;
+      text-align: center;
+      box-shadow: 0 4px 0 #e0d4c8, 0 6px 16px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .level-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #FF6B6B, #FFD43B, #51CF66, #4DABF7);
+    }
+
+    .level-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.25rem;
+      color: #1565C0;
+      margin-bottom: 4px;
+    }
+
+    .level-instr {
+      font-size: .9rem;
+      color: #888;
+      font-weight: 700;
+    }
+
+    /* Progress */
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .prog-bar {
+      flex: 1;
+      height: 14px;
+      background: #e8e8e8;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .prog-fill {
+      height: 100%;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #43E97B, #38F9D7);
+      transition: width .35s ease;
+    }
+
+    .prog-label {
+      font-family: 'Fredoka One', cursive;
+      font-size: .85rem;
+      color: #aaa;
+      white-space: nowrap;
+    }
+
+    /* Items zone */
+    .items-zone {
+      background: white;
+      border-radius: 18px;
+      padding: 14px 14px 16px;
+      box-shadow: 0 4px 0 #e0d4c8, 0 6px 16px rgba(0,0,0,0.08);
+    }
+
+    .zone-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: .85rem;
+      color: #bbb;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+    }
+
+    .items-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      min-height: 96px;
+    }
+
+    /* Product card */
+    .item-card {
+      width: 84px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 3px 0 #ddd, 0 5px 12px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s, opacity .3s;
+      background: white;
+      border: 2.5px solid #f0f0f0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-card:hover:not(.placed) {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 8px 0 #ddd, 0 12px 20px rgba(0,0,0,0.12);
+    }
+
+    .item-card.selected {
+      border-color: #1565C0;
+      box-shadow: 0 0 0 4px rgba(21,101,192,0.25), 0 6px 0 #1565C0;
+      transform: translateY(-6px) scale(1.08);
+    }
+
+    .item-card.placed {
+      opacity: .22;
+      pointer-events: none;
+      transform: scale(.85);
+    }
+
+    .item-card.shake { animation: shake .45s ease; }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      18% { transform: translateX(-10px) rotate(-5deg); }
+      36% { transform: translateX(10px) rotate(5deg); }
+      54% { transform: translateX(-6px) rotate(-2deg); }
+      72% { transform: translateX(6px) rotate(2deg); }
+      90% { transform: translateX(-3px); }
+    }
+
+    .card-stripe { height: 8px; }
+    .card-body {
+      padding: 8px 4px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .card-emoji { font-size: 2.5rem; line-height: 1; }
+    .card-name {
+      font-size: .58rem;
+      font-weight: 900;
+      color: #777;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    /* Shelf zones */
+    .shelves-zone {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .shelf {
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 5px 0 rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      border: 3px solid transparent;
+      background: white;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .shelf:hover { transform: translateY(-3px); }
+
+    .shelf.drag-over {
+      border-color: #1565C0;
+      transform: scale(1.04);
+      box-shadow: 0 0 0 4px rgba(21,101,192,0.2), 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .shelf.correct-flash { animation: flashShelf .55s ease; }
+
+    @keyframes flashShelf {
+      0%   { background: white; }
+      40%  { background: #D4EDDA; }
+      100% { background: white; }
+    }
+
+    .shelf-header {
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .shelf-emoji { font-size: 1.5rem; }
+    .shelf-name {
+      font-family: 'Fredoka One', cursive;
+      font-size: .82rem;
+      color: white;
+      text-align: center;
+    }
+
+    .shelf-body {
+      flex: 1;
+      min-height: 90px;
+      padding: 8px 6px;
+      background: #FAFAFA;
+      border-top: 5px solid #D2B48C;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: center;
+      align-content: flex-start;
+    }
+
+    .placed-item {
+      font-size: 1.8rem;
+      animation: popIn .3s cubic-bezier(.175,.885,.32,1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0) rotate(-15deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0); opacity: 1; }
+    }
+
+    /* Feedback bubble */
+    .feedback {
+      background: white;
+      border-radius: 18px;
+      padding: 12px 18px;
+      text-align: center;
+      box-shadow: 0 4px 0 #e0d4c8, 0 6px 14px rgba(0,0,0,0.08);
+      font-size: .95rem;
+      font-weight: 700;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .25s;
+      color: #555;
+    }
+    .feedback.correct { background: #D4EDDA; color: #155724; }
+    .feedback.wrong   { background: #F8D7DA; color: #721C24; }
+    .feedback.hint    { background: #FFF3CD; color: #856404; }
+
+    /* ======================================================
+       LEVEL COMPLETE
+    ====================================================== */
+    #level-complete {
+      min-height: 100vh;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 20px;
+      padding: 30px;
+      background: radial-gradient(ellipse at center, #E8F5E9, #C8E6C9);
+    }
+
+    .lc-stars {
+      font-size: 4.5rem;
+      animation: spinIn .6s cubic-bezier(.175,.885,.32,1.275);
+    }
+
+    @keyframes spinIn {
+      from { transform: rotate(-20deg) scale(0); opacity: 0; }
+      to   { transform: rotate(0) scale(1); opacity: 1; }
+    }
+
+    .lc-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.6rem;
+      color: #1B5E20;
+      text-shadow: 3px 4px 0 rgba(0,0,0,0.1);
+      line-height: 1.1;
+    }
+
+    .lc-msg {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #2E7D32;
+    }
+
+    .btn-next {
+      background: #43A047;
+      color: white;
+      border: 4px solid rgba(255,255,255,0.5);
+      border-radius: 50px;
+      padding: 14px 44px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #2E7D32, 0 10px 20px rgba(0,0,0,0.15);
+      transition: transform .1s, box-shadow .1s;
+    }
+    .btn-next:active { transform: translateY(4px); box-shadow: 0 2px 0 #2E7D32; }
+
+    /* ======================================================
+       GAME OVER
+    ====================================================== */
+    #game-over {
+      min-height: 100vh;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 22px;
+      padding: 30px;
+      background: radial-gradient(ellipse at center, #FFF8E1, #FFE082);
+    }
+
+    .go-trophy {
+      font-size: 6rem;
+      animation: bounce 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes bounce {
+      from { transform: translateY(0) scale(1); }
+      to   { transform: translateY(-18px) scale(1.05); }
+    }
+
+    .go-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.8rem;
+      color: #E65100;
+      text-shadow: 3px 4px 0 rgba(0,0,0,0.1);
+    }
+
+    .go-score-box {
+      background: white;
+      border-radius: 24px;
+      padding: 20px 50px;
+      box-shadow: 0 6px 0 #FFB300, 0 10px 24px rgba(0,0,0,0.12);
+    }
+    .go-score-num {
+      font-family: 'Fredoka One', cursive;
+      font-size: 3.2rem;
+      color: #F57C00;
+    }
+    .go-score-sub { font-size: .85rem; color: #aaa; font-weight: 700; }
+
+    .btn-replay {
+      background: #F57C00;
+      color: white;
+      border: 4px solid rgba(255,255,255,0.5);
+      border-radius: 50px;
+      padding: 14px 44px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #E65100, 0 10px 20px rgba(0,0,0,0.15);
+      transition: transform .1s, box-shadow .1s;
+    }
+    .btn-replay:active { transform: translateY(4px); box-shadow: 0 2px 0 #E65100; }
+
+    /* ======================================================
+       DRAG GHOST + CONFETTI
+    ====================================================== */
+    #drag-ghost {
+      position: fixed;
+      pointer-events: none;
+      z-index: 1000;
+      font-size: 3.5rem;
+      transform: translate(-50%, -50%);
+      display: none;
+      filter: drop-shadow(0 8px 14px rgba(0,0,0,0.3));
+    }
+
+    .cf-wrap {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+
+    .cp {
+      position: absolute;
+      top: -24px;
+      animation: cfFall linear forwards;
+    }
+
+    @keyframes cfFall {
+      from { transform: translateY(0) rotate(0deg); opacity: 1; }
+      to   { transform: translateY(110vh) rotate(540deg); opacity: 0; }
+    }
+
+    /* Responsive */
+    @media (max-width: 460px) {
+      .item-card  { width: 70px; }
+      .card-emoji { font-size: 2rem; }
+      .shelf-name { font-size: .7rem; }
+      .start-title { font-size: 2.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="drag-ghost"></div>
+
+<!-- ============================================================
+     START SCREEN
+============================================================ -->
+<div id="start-screen">
+
+  <!-- Bubble decorations -->
+  <div class="bubble" style="width:90px;height:90px;top:14%;left:8%"></div>
+  <div class="bubble" style="width:50px;height:50px;top:22%;left:18%"></div>
+  <div class="bubble" style="width:35px;height:35px;top:12%;left:28%"></div>
+  <div class="bubble" style="width:60px;height:60px;bottom:28%;right:12%"></div>
+  <div class="bubble" style="width:30px;height:30px;bottom:38%;right:24%"></div>
+
+  <!-- Top-right plants -->
+  <svg class="deco deco-tr" width="230" height="210" viewBox="0 0 230 210" fill="none">
+    <path d="M230 0 C200 25,165 55,155 105 C185 72,215 35,230 0Z" fill="#26C6DA" stroke="white" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M210 0 C170 18,130 60,125 115 C160 78,195 38,210 0Z" fill="#4CAF50" stroke="white" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M185 0 C155 30,140 75,155 125 C172 88,185 44,185 0Z" fill="#EF5350" stroke="white" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M228 55 C198 70,175 100,180 145 C200 118,220 88,228 55Z" fill="#66BB6A" stroke="white" stroke-width="4" stroke-linejoin="round"/>
+  </svg>
+
+  <!-- Bottom-left plants -->
+  <svg class="deco deco-bl" width="250" height="230" viewBox="0 0 250 230" fill="none">
+    <path d="M10 230 C5 185,20 148,75 108 C85 152,65 195,10 230Z" fill="#4CAF50" stroke="white" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M55 230 C35 178,55 128,120 92 C122 145,95 198,55 230Z" fill="#66BB6A" stroke="white" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M100 230 C88 196,105 162,100 125 C118 148,125 178,148 200 C135 218,112 228,100 230Z" fill="#FFA726" stroke="white" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M140 230 C128 196,145 155,168 118 C175 155,162 200,140 230Z" fill="#EF5350" stroke="white" stroke-width="4" stroke-linejoin="round"/>
+  </svg>
+
+  <!-- Bottom-right smaller accent -->
+  <svg class="deco deco-br" width="140" height="130" viewBox="0 0 140 130" fill="none">
+    <path d="M140 130 C118 110,108 82,120 55 C130 78,138 104,140 130Z" fill="#FFD54F" stroke="white" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M108 130 C92 105,98 72,118 48 C120 78,116 106,108 130Z" fill="#26C6DA" stroke="white" stroke-width="4" stroke-linejoin="round"/>
+  </svg>
+
+  <!-- Content -->
+  <div class="start-cart">🛒</div>
+
+  <h1 class="start-title">
+    La Mision del<br>
+    <span class="title-yellow">Supermercado</span><br>
+    <span class="title-teal">Magico</span>
+  </h1>
+
+  <p class="start-sub">Ayuda a ordenar el supermercado!</p>
+
+  <div class="level-pills">
+    <span class="level-pill">Nivel 1: Tipo de alimento</span>
+    <span class="level-pill">Nivel 2: Color</span>
+    <span class="level-pill">Nivel 3: Tamano</span>
+  </div>
+
+  <button class="btn-start" id="start-btn">Comenzar</button>
+</div>
+
+<!-- ============================================================
+     GAME SCREEN
+============================================================ -->
+<div id="game-screen">
+  <div class="game-inner">
+
+    <!-- Store header -->
+    <div class="store-header">
+      <div class="store-flag" id="level-badge">Nivel 1</div>
+      <div class="store-name">Supermercado Magico 🛒</div>
+      <div class="store-score">⭐ <span id="score-display">0</span></div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-row">
+      <span class="prog-label" id="prog-text">0 / 6</span>
+      <div class="prog-bar">
+        <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Level card -->
+    <div class="level-card">
+      <div class="level-title" id="level-title"></div>
+      <div class="level-instr" id="level-instr"></div>
+    </div>
+
+    <!-- Items -->
+    <div class="items-zone">
+      <div class="zone-title">Alimentos para clasificar</div>
+      <div class="items-grid" id="items-grid"></div>
+    </div>
+
+    <!-- Shelves -->
+    <div class="shelves-zone" id="shelves-zone"></div>
+
+    <!-- Feedback -->
+    <div class="feedback" id="feedback">
+      Toca un alimento y luego toca el estante correcto
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     LEVEL COMPLETE
+============================================================ -->
+<div id="level-complete">
+  <div class="lc-stars" id="lc-stars">⭐⭐⭐</div>
+  <h2 class="lc-title" id="lc-title"></h2>
+  <p class="lc-msg" id="lc-msg"></p>
+  <button class="btn-next" id="next-btn"></button>
+</div>
+
+<!-- ============================================================
+     GAME OVER
+============================================================ -->
+<div id="game-over">
+  <div class="go-trophy">🏆</div>
+  <h2 class="go-title">Felicitaciones!</h2>
+  <p style="font-size:1.1rem;font-weight:700;color:#5D4037">Completaste el Supermercado Magico!</p>
+  <div class="go-score-box">
+    <div class="go-score-num" id="final-score"></div>
+    <div class="go-score-sub">puntos de 18</div>
+  </div>
+  <button class="btn-replay" id="replay-btn">Jugar de nuevo!</button>
+</div>
+
+<!-- ============================================================
+     SCRIPT
+============================================================ -->
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const COLORS = {
+  apple:'#FF6B6B', banana:'#FFD43B', carrot:'#FF922B',
+  milk:'#4DABF7', cheese:'#FFE066', yogurt:'#CC5DE8',
+  s_apple:'#FF6B6B', s_straw:'#E03131', s_ban:'#FFD43B',
+  s_lemon:'#F0B429', s_broc:'#51CF66', s_avoc:'#37B24D',
+  t_water:'#FF6B6B', t_pine:'#FFA94D', t_apple:'#FF6B6B',
+  t_ora:'#FF922B',  t_cher:'#C92A2A', t_grape:'#845EF7'
+};
+
+const LEVELS = [
+  {
+    id: 1,
+    title: "Que tipo de alimento es?",
+    instr: "Toca o arrastra cada alimento a su estante",
+    categories: [
+      { id:"frutas",   label:"Frutas",   emoji:"🍓", bg:"#FF6B6B" },
+      { id:"verduras", label:"Verduras", emoji:"🥬", bg:"#51CF66" },
+      { id:"lacteos",  label:"Lacteos",  emoji:"🐄", bg:"#4DABF7" }
+    ],
+    items: [
+      { id:"apple",  emoji:"🍎", name:"Manzana",   cat:"frutas"   },
+      { id:"banana", emoji:"🍌", name:"Platano",   cat:"frutas"   },
+      { id:"carrot", emoji:"🥕", name:"Zanahoria", cat:"verduras" },
+      { id:"milk",   emoji:"🥛", name:"Leche",     cat:"lacteos"  },
+      { id:"cheese", emoji:"🧀", name:"Queso",     cat:"lacteos"  },
+      { id:"yogurt", emoji:"🍶", name:"Yogur",     cat:"lacteos"  }
+    ]
+  },
+  {
+    id: 2,
+    title: "De que color es?",
+    instr: "Clasifica los alimentos por su color",
+    categories: [
+      { id:"rojo",     label:"Rojos",     emoji:"❤️", bg:"#FF6B6B" },
+      { id:"amarillo", label:"Amarillos", emoji:"💛", bg:"#F0B429" },
+      { id:"verde",    label:"Verdes",    emoji:"💚", bg:"#51CF66" }
+    ],
+    items: [
+      { id:"s_apple", emoji:"🍎", name:"Manzana",  cat:"rojo"     },
+      { id:"s_straw", emoji:"🍓", name:"Frutilla", cat:"rojo"     },
+      { id:"s_ban",   emoji:"🍌", name:"Platano",  cat:"amarillo" },
+      { id:"s_lemon", emoji:"🍋", name:"Limon",    cat:"amarillo" },
+      { id:"s_broc",  emoji:"🥦", name:"Brocoli",  cat:"verde"    },
+      { id:"s_avoc",  emoji:"🥑", name:"Palta",    cat:"verde"    }
+    ]
+  },
+  {
+    id: 3,
+    title: "De que tamano es?",
+    instr: "Ordena los alimentos segun su tamano",
+    categories: [
+      { id:"grande",  label:"Grande",  emoji:"🐘", bg:"#FF922B" },
+      { id:"mediano", label:"Mediano", emoji:"🐱", bg:"#CC5DE8" },
+      { id:"pequeno", label:"Pequeno", emoji:"🐭", bg:"#20C997" }
+    ],
+    items: [
+      { id:"t_water", emoji:"🍉", name:"Sandia",  cat:"grande"  },
+      { id:"t_pine",  emoji:"🍍", name:"Pina",    cat:"grande"  },
+      { id:"t_apple", emoji:"🍎", name:"Manzana", cat:"mediano" },
+      { id:"t_ora",   emoji:"🍊", name:"Naranja", cat:"mediano" },
+      { id:"t_cher",  emoji:"🍒", name:"Cerezas", cat:"pequeno" },
+      { id:"t_grape", emoji:"🍇", name:"Uvas",    cat:"pequeno" }
+    ]
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let G = { level:0, score:0, placed:{}, selected:null, audio:null };
+let drag = null;
+let dragMoved = false;
+
+// ============================================================
+// AUDIO
+// ============================================================
+function initAudio() {
+  if (!G.audio) G.audio = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function tone(f, type, dur, d) {
+  if (!G.audio) return;
+  const o = G.audio.createOscillator(), g = G.audio.createGain();
+  o.connect(g); g.connect(G.audio.destination);
+  o.type = type; o.frequency.value = f;
+  const t = G.audio.currentTime + (d||0);
+  g.gain.setValueAtTime(.22,t);
+  g.gain.exponentialRampToValueAtTime(.001, t+dur);
+  o.start(t); o.stop(t+dur);
+}
+
+const sfx = {
+  correct:  () => { tone(523,'sine',.12,0); tone(659,'sine',.12,.1); tone(784,'sine',.2,.2); },
+  wrong:    () => { tone(220,'sawtooth',.14,0); tone(175,'sawtooth',.18,.14); },
+  level:    () => [523,587,659,698,784,880].forEach((f,i) => tone(f,'sine',.2,i*.1)),
+  win:      () => [784,880,988,1047,880,784,659,784].forEach((f,i) => tone(f,'sine',.2,i*.13))
+};
+
+// ============================================================
+// SCREENS
+// ============================================================
+function show(id) {
+  ['start-screen','game-screen','level-complete','game-over']
+    .forEach(s => document.getElementById(s).style.display = 'none');
+  document.getElementById(id).style.display = 'flex';
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  const lv = LEVELS[G.level];
+
+  document.getElementById('level-badge').textContent  = 'Nivel ' + lv.id;
+  document.getElementById('score-display').textContent = G.score;
+  document.getElementById('level-title').textContent   = lv.title;
+  document.getElementById('level-instr').textContent   = lv.instr;
+
+  const done = Object.keys(G.placed).length;
+  document.getElementById('prog-text').textContent = done + ' / ' + lv.items.length;
+  document.getElementById('prog-fill').style.width = (done / lv.items.length * 100) + '%';
+
+  // Items
+  const grid = document.getElementById('items-grid');
+  grid.innerHTML = '';
+  lv.items.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'item-card' +
+      (G.placed[item.id] ? ' placed' : '') +
+      (G.selected === item.id ? ' selected' : '');
+    card.dataset.id = item.id;
+    const color = COLORS[item.id] || '#aaa';
+    card.innerHTML =
+      '<div class="card-stripe" style="background:' + color + '"></div>' +
+      '<div class="card-body">' +
+        '<div class="card-emoji">' + item.emoji + '</div>' +
+        '<div class="card-name">' + item.name + '</div>' +
+      '</div>';
+    card.addEventListener('pointerdown', e => onItemDown(e, item.id));
+    grid.appendChild(card);
+  });
+
+  // Shelves
+  const zone = document.getElementById('shelves-zone');
+  zone.innerHTML = '';
+  lv.categories.forEach(cat => {
+    const shelf = document.createElement('div');
+    shelf.className = 'shelf';
+    shelf.dataset.cat = cat.id;
+
+    const header = document.createElement('div');
+    header.className = 'shelf-header';
+    header.style.background = cat.bg;
+    header.innerHTML =
+      '<div class="shelf-emoji">' + cat.emoji + '</div>' +
+      '<div class="shelf-name">' + cat.label + '</div>';
+
+    const body = document.createElement('div');
+    body.className = 'shelf-body';
+
+    Object.entries(G.placed).forEach(([iid, cid]) => {
+      if (cid === cat.id) {
+        const it = lv.items.find(x => x.id === iid);
+        if (it) {
+          const el = document.createElement('div');
+          el.className = 'placed-item';
+          el.textContent = it.emoji;
+          body.appendChild(el);
+        }
+      }
+    });
+
+    shelf.appendChild(header);
+    shelf.appendChild(body);
+    shelf.addEventListener('click', () => { if (!dragMoved) onShelfClick(cat.id); });
+    zone.appendChild(shelf);
+  });
+}
+
+function fb(msg, type) {
+  const el = document.getElementById('feedback');
+  el.className = 'feedback' + (type ? ' ' + type : '');
+  el.textContent = msg;
+}
+
+// ============================================================
+// DRAG
+// ============================================================
+const ghost = document.getElementById('drag-ghost');
+
+function onItemDown(e, itemId) {
+  if (G.placed[itemId]) return;
+  e.preventDefault(); e.stopPropagation();
+  drag = { id: itemId, sx: e.clientX, sy: e.clientY };
+  dragMoved = false;
+  e.currentTarget.setPointerCapture(e.pointerId);
+}
+
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!dragMoved && (Math.abs(e.clientX - drag.sx) > 6 || Math.abs(e.clientY - drag.sy) > 6)) {
+    dragMoved = true;
+    const item = LEVELS[G.level].items.find(x => x.id === drag.id);
+    ghost.textContent = item.emoji;
+    ghost.style.display = 'block';
+    G.selected = drag.id;
+    render();
+  }
+  if (dragMoved) {
+    ghost.style.left = e.clientX + 'px';
+    ghost.style.top  = e.clientY + 'px';
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const shelf = el?.closest('.shelf');
+    document.querySelectorAll('.shelf').forEach(s => s.classList.remove('drag-over'));
+    if (shelf) shelf.classList.add('drag-over');
+  }
+});
+
+document.addEventListener('pointerup', e => {
+  if (!drag) return;
+  ghost.style.display = 'none';
+  document.querySelectorAll('.shelf').forEach(s => s.classList.remove('drag-over'));
+
+  if (dragMoved) {
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const shelf = el?.closest('.shelf');
+    if (shelf) tryPlace(drag.id, shelf.dataset.cat);
+    else { G.selected = null; render(); }
+  } else {
+    selectItem(drag.id);
+  }
+  drag = null;
+});
+
+// ============================================================
+// LOGIC
+// ============================================================
+function selectItem(id) {
+  if (G.placed[id]) return;
+  if (G.selected === id) {
+    G.selected = null;
+    fb('Toca un alimento y luego toca el estante correcto', '');
+  } else {
+    G.selected = id;
+    const item = LEVELS[G.level].items.find(x => x.id === id);
+    fb('Seleccionaste ' + item.emoji + ' ' + item.name + '. Ahora toca el estante!', 'hint');
+  }
+  render();
+}
+
+function onShelfClick(catId) {
+  if (!G.selected) { fb('Primero selecciona un alimento!', ''); return; }
+  tryPlace(G.selected, catId);
+}
+
+function tryPlace(itemId, catId) {
+  if (!itemId || G.placed[itemId]) return;
+  const lv = LEVELS[G.level];
+  const item = lv.items.find(x => x.id === itemId);
+  if (!item) return;
+
+  if (item.cat === catId) {
+    G.placed[itemId] = catId;
+    G.score++;
+    G.selected = null;
+    document.getElementById('score-display').textContent = G.score;
+    sfx.correct();
+    const cat = lv.categories.find(c => c.id === catId);
+    fb('Muy bien! ' + item.emoji + ' ' + item.name + ' va en ' + cat.label + '! ✅', 'correct');
+    render();
+    const shelf = document.querySelector('[data-cat="' + catId + '"]');
+    if (shelf) { shelf.classList.add('correct-flash'); setTimeout(() => shelf.classList.remove('correct-flash'), 550); }
+    if (Object.keys(G.placed).length === lv.items.length) setTimeout(levelDone, 850);
+  } else {
+    sfx.wrong();
+    const correctCat = lv.categories.find(c => c.id === item.cat);
+    fb('Intentalo de nuevo! ' + item.emoji + ' ' + item.name + ' va en ' + correctCat.emoji + ' ' + correctCat.label + ' 🤔', 'wrong');
+    const card = document.querySelector('[data-id="' + itemId + '"]');
+    if (card) { card.classList.add('shake'); setTimeout(() => card.classList.remove('shake'), 450); }
+    G.selected = null;
+    render();
+  }
+}
+
+function levelDone() {
+  const lv = LEVELS[G.level];
+  confetti();
+  if (G.level < LEVELS.length - 1) {
+    sfx.level();
+    document.getElementById('lc-stars').textContent = '⭐⭐⭐';
+    document.getElementById('lc-title').textContent  = 'Nivel ' + lv.id + ' completado!';
+    document.getElementById('lc-msg').textContent    = 'Excelente! Tienes ' + G.score + ' puntos. Sigue adelante!';
+    document.getElementById('next-btn').textContent  = 'Nivel ' + (lv.id + 1) + ' !';
+    show('level-complete');
+  } else {
+    sfx.win(); confetti(); confetti();
+    document.getElementById('final-score').textContent = G.score + ' pts';
+    show('game-over');
+  }
+}
+
+function startLevel(idx) {
+  G.level = idx; G.placed = {}; G.selected = null;
+  render();
+  fb('Toca un alimento y luego toca el estante correcto', '');
+  show('game-screen');
+}
+
+// ============================================================
+// CONFETTI
+// ============================================================
+function confetti() {
+  const colors = ['#FF6B6B','#FFD43B','#51CF66','#4DABF7','#CC5DE8','#FF922B'];
+  const emos   = ['🎉','⭐','🌟','✨','🎊'];
+  const wrap = document.createElement('div');
+  wrap.className = 'cf-wrap';
+  document.body.appendChild(wrap);
+  for (let i = 0; i < 48; i++) {
+    const p = document.createElement('div');
+    p.className = 'cp';
+    if (Math.random() > .4) {
+      p.textContent = emos[Math.floor(Math.random() * emos.length)];
+      p.style.fontSize = (Math.random() * 12 + 14) + 'px';
+    } else {
+      p.style.width  = (Math.random() * 10 + 6) + 'px';
+      p.style.height = p.style.width;
+      p.style.borderRadius = Math.random() > .5 ? '50%' : '3px';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    }
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animation = 'cfFall ' + (Math.random()*2+2).toFixed(1) + 's ' + (Math.random()*.8).toFixed(2) + 's linear forwards';
+    wrap.appendChild(p);
+  }
+  setTimeout(() => wrap.remove(), 4200);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.getElementById('start-btn').addEventListener('click', () => {
+  initAudio();
+  G = { level:0, score:0, placed:{}, selected:null, audio:G.audio };
+  startLevel(0);
+});
+
+document.getElementById('next-btn').addEventListener('click', () => startLevel(G.level + 1));
+
+document.getElementById('replay-btn').addEventListener('click', () => {
+  G = { level:0, score:0, placed:{}, selected:null, audio:G.audio };
+  show('start-screen');
+});
+
+show('start-screen');
+</script>
+</body>
+</html>
