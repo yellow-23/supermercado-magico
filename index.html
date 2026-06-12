@@ -180,12 +180,25 @@
 
     .store-score {
       background: rgba(255,255,255,0.15);
-      padding: 12px 16px;
+      padding: 8px 12px;
+      border-radius: 12px;
       font-family: 'Fredoka One', cursive;
       font-size: 1rem;
       color: #FFD54F;
       white-space: nowrap;
     }
+
+    .speak-btn {
+      background: rgba(255,255,255,0.18);
+      border: 2px solid rgba(255,255,255,0.4);
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      flex-shrink: 0;
+    }
+    .speak-btn:active { background: rgba(255,255,255,0.4); transform: scale(.9); }
 
     /* Level info card */
     .level-card {
@@ -648,7 +661,10 @@
     <div class="store-header">
       <div class="store-flag" id="level-badge">Nivel 1</div>
       <div class="store-name">Supermercado Magico 🛒</div>
-      <div class="store-score">⭐ <span id="score-display">0</span></div>
+      <div style="display:flex;align-items:center;gap:6px;padding-right:12px;">
+        <button class="speak-btn" id="speak-btn" title="Escuchar instruccion">🔊</button>
+        <div class="store-score">⭐ <span id="score-display">0</span></div>
+      </div>
     </div>
 
     <!-- Progress -->
@@ -701,7 +717,7 @@
   <p style="font-size:1.1rem;font-weight:700;color:#5D4037">Completaste el Supermercado Magico!</p>
   <div class="go-score-box">
     <div class="go-score-num" id="final-score"></div>
-    <div class="go-score-sub">puntos de 18</div>
+    <div class="go-score-sub">puntos de 27</div>
   </div>
   <button class="btn-replay" id="replay-btn">Jugar de nuevo!</button>
 </div>
@@ -714,19 +730,26 @@
 // DATA
 // ============================================================
 const COLORS = {
-  apple:'#FF6B6B', banana:'#FFD43B', carrot:'#FF922B',
+  // nivel 1
+  apple:'#FF6B6B', banana:'#FFD43B', grape:'#845EF7',
+  carrot:'#FF922B', broc:'#51CF66', corn:'#FFD43B',
   milk:'#4DABF7', cheese:'#FFE066', yogurt:'#CC5DE8',
-  s_apple:'#FF6B6B', s_straw:'#E03131', s_ban:'#FFD43B',
-  s_lemon:'#F0B429', s_broc:'#51CF66', s_avoc:'#37B24D',
-  t_water:'#FF6B6B', t_pine:'#FFA94D', t_apple:'#FF6B6B',
-  t_ora:'#FF922B',  t_cher:'#C92A2A', t_grape:'#845EF7'
+  // nivel 2
+  s_apple:'#FF6B6B', s_straw:'#E03131', s_tom:'#E03131',
+  s_ban:'#FFD43B', s_lemon:'#F0B429', s_corn:'#FFD43B',
+  s_broc:'#51CF66', s_avoc:'#37B24D', s_cuc:'#51CF66',
+  // nivel 3
+  t_water:'#FF6B6B', t_pine:'#FFA94D', t_pump:'#FF922B',
+  t_apple:'#FF6B6B', t_ora:'#FF922B', t_pear:'#A9E34B',
+  t_cher:'#C92A2A', t_grape:'#845EF7', t_blue:'#4DABF7'
 };
 
 const LEVELS = [
   {
     id: 1,
     title: "Que tipo de alimento es?",
-    instr: "Toca o arrastra cada alimento a su estante",
+    instr: "Clasifica cada alimento en su estante correcto",
+    voice: "Nivel uno. Que tipo de alimento es? Arrastra o toca cada alimento y colócalo en su estante.",
     categories: [
       { id:"frutas",   label:"Frutas",   emoji:"🍓", bg:"#FF6B6B" },
       { id:"verduras", label:"Verduras", emoji:"🥬", bg:"#51CF66" },
@@ -735,7 +758,10 @@ const LEVELS = [
     items: [
       { id:"apple",  emoji:"🍎", name:"Manzana",   cat:"frutas"   },
       { id:"banana", emoji:"🍌", name:"Platano",   cat:"frutas"   },
+      { id:"grape",  emoji:"🍇", name:"Uvas",      cat:"frutas"   },
       { id:"carrot", emoji:"🥕", name:"Zanahoria", cat:"verduras" },
+      { id:"broc",   emoji:"🥦", name:"Brocoli",   cat:"verduras" },
+      { id:"corn",   emoji:"🌽", name:"Choclo",    cat:"verduras" },
       { id:"milk",   emoji:"🥛", name:"Leche",     cat:"lacteos"  },
       { id:"cheese", emoji:"🧀", name:"Queso",     cat:"lacteos"  },
       { id:"yogurt", emoji:"🍶", name:"Yogur",     cat:"lacteos"  }
@@ -745,6 +771,7 @@ const LEVELS = [
     id: 2,
     title: "De que color es?",
     instr: "Clasifica los alimentos por su color",
+    voice: "Nivel dos. De qué color es? Agrupa cada alimento según su color.",
     categories: [
       { id:"rojo",     label:"Rojos",     emoji:"❤️", bg:"#FF6B6B" },
       { id:"amarillo", label:"Amarillos", emoji:"💛", bg:"#F0B429" },
@@ -753,28 +780,35 @@ const LEVELS = [
     items: [
       { id:"s_apple", emoji:"🍎", name:"Manzana",  cat:"rojo"     },
       { id:"s_straw", emoji:"🍓", name:"Frutilla", cat:"rojo"     },
+      { id:"s_tom",   emoji:"🍅", name:"Tomate",   cat:"rojo"     },
       { id:"s_ban",   emoji:"🍌", name:"Platano",  cat:"amarillo" },
       { id:"s_lemon", emoji:"🍋", name:"Limon",    cat:"amarillo" },
+      { id:"s_corn",  emoji:"🌽", name:"Choclo",   cat:"amarillo" },
       { id:"s_broc",  emoji:"🥦", name:"Brocoli",  cat:"verde"    },
-      { id:"s_avoc",  emoji:"🥑", name:"Palta",    cat:"verde"    }
+      { id:"s_avoc",  emoji:"🥑", name:"Palta",    cat:"verde"    },
+      { id:"s_cuc",   emoji:"🥒", name:"Pepino",   cat:"verde"    }
     ]
   },
   {
     id: 3,
     title: "De que tamano es?",
     instr: "Ordena los alimentos segun su tamano",
+    voice: "Nivel tres. De qué tamaño es? Coloca cada alimento en el estante que le corresponde según su tamaño.",
     categories: [
       { id:"grande",  label:"Grande",  emoji:"🐘", bg:"#FF922B" },
       { id:"mediano", label:"Mediano", emoji:"🐱", bg:"#CC5DE8" },
       { id:"pequeno", label:"Pequeno", emoji:"🐭", bg:"#20C997" }
     ],
     items: [
-      { id:"t_water", emoji:"🍉", name:"Sandia",  cat:"grande"  },
-      { id:"t_pine",  emoji:"🍍", name:"Pina",    cat:"grande"  },
-      { id:"t_apple", emoji:"🍎", name:"Manzana", cat:"mediano" },
-      { id:"t_ora",   emoji:"🍊", name:"Naranja", cat:"mediano" },
-      { id:"t_cher",  emoji:"🍒", name:"Cerezas", cat:"pequeno" },
-      { id:"t_grape", emoji:"🍇", name:"Uvas",    cat:"pequeno" }
+      { id:"t_water", emoji:"🍉", name:"Sandia",    cat:"grande"  },
+      { id:"t_pine",  emoji:"🍍", name:"Pina",      cat:"grande"  },
+      { id:"t_pump",  emoji:"🎃", name:"Calabaza",  cat:"grande"  },
+      { id:"t_apple", emoji:"🍎", name:"Manzana",   cat:"mediano" },
+      { id:"t_ora",   emoji:"🍊", name:"Naranja",   cat:"mediano" },
+      { id:"t_pear",  emoji:"🍐", name:"Pera",      cat:"mediano" },
+      { id:"t_cher",  emoji:"🍒", name:"Cerezas",   cat:"pequeno" },
+      { id:"t_grape", emoji:"🍇", name:"Uvas",      cat:"pequeno" },
+      { id:"t_blue",  emoji:"🫐", name:"Arandanos", cat:"pequeno" }
     ]
   }
 ];
@@ -782,9 +816,31 @@ const LEVELS = [
 // ============================================================
 // STATE
 // ============================================================
-let G = { level:0, score:0, placed:{}, selected:null, audio:null };
+let G = { level:0, score:0, placed:{}, selected:null, audio:null, itemOrder:[] };
 let drag = null;
 let dragMoved = false;
+
+// ============================================================
+// UTILS
+// ============================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'es-ES';
+  u.rate = 0.88;
+  u.pitch = 1.1;
+  window.speechSynthesis.speak(u);
+}
 
 // ============================================================
 // AUDIO
@@ -835,10 +891,11 @@ function render() {
   document.getElementById('prog-text').textContent = done + ' / ' + lv.items.length;
   document.getElementById('prog-fill').style.width = (done / lv.items.length * 100) + '%';
 
-  // Items
+  // Items (en orden aleatorio fijado al inicio del nivel)
   const grid = document.getElementById('items-grid');
   grid.innerHTML = '';
-  lv.items.forEach(item => {
+  const orderedItems = G.itemOrder.map(id => lv.items.find(x => x.id === id));
+  orderedItems.forEach(item => {
     const card = document.createElement('div');
     card.className = 'item-card' +
       (G.placed[item.id] ? ' placed' : '') +
@@ -982,6 +1039,7 @@ function tryPlace(itemId, catId) {
     sfx.correct();
     const cat = lv.categories.find(c => c.id === catId);
     fb('Muy bien! ' + item.emoji + ' ' + item.name + ' va en ' + cat.label + '! ✅', 'correct');
+    speak('Muy bien! ' + item.name + ' va en ' + cat.label);
     render();
     const shelf = document.querySelector('[data-cat="' + catId + '"]');
     if (shelf) { shelf.classList.add('correct-flash'); setTimeout(() => shelf.classList.remove('correct-flash'), 550); }
@@ -990,6 +1048,7 @@ function tryPlace(itemId, catId) {
     sfx.wrong();
     const correctCat = lv.categories.find(c => c.id === item.cat);
     fb('Intentalo de nuevo! ' + item.emoji + ' ' + item.name + ' va en ' + correctCat.emoji + ' ' + correctCat.label + ' 🤔', 'wrong');
+    speak('Intentalo de nuevo. ' + item.name + ' va en ' + correctCat.label);
     const card = document.querySelector('[data-id="' + itemId + '"]');
     if (card) { card.classList.add('shake'); setTimeout(() => card.classList.remove('shake'), 450); }
     G.selected = null;
@@ -1016,9 +1075,11 @@ function levelDone() {
 
 function startLevel(idx) {
   G.level = idx; G.placed = {}; G.selected = null;
+  G.itemOrder = shuffle(LEVELS[idx].items.map(x => x.id));
   render();
   fb('Toca un alimento y luego toca el estante correcto', '');
   show('game-screen');
+  setTimeout(() => speak(LEVELS[idx].voice), 400);
 }
 
 // ============================================================
@@ -1054,8 +1115,12 @@ function confetti() {
 // ============================================================
 document.getElementById('start-btn').addEventListener('click', () => {
   initAudio();
-  G = { level:0, score:0, placed:{}, selected:null, audio:G.audio };
+  G = { level:0, score:0, placed:{}, selected:null, audio:G.audio, itemOrder:[] };
   startLevel(0);
+});
+
+document.getElementById('speak-btn').addEventListener('click', () => {
+  speak(LEVELS[G.level].voice);
 });
 
 document.getElementById('next-btn').addEventListener('click', () => startLevel(G.level + 1));
