@@ -354,6 +354,10 @@
       gap: 10px;
     }
 
+    .sort-zone {
+      width: 100%;
+    }
+
     .shelf {
       border-radius: 18px;
       overflow: hidden;
@@ -999,7 +1003,7 @@ function render() {
   zone.innerHTML = '';
 
   if (lv.mode === 'sort') {
-    zone.style.display = 'block'; // anula el grid de 3 columnas
+    zone.className = 'sort-zone';
 
     const strip = document.createElement('div');
     strip.className = 'sort-strip';
@@ -1039,7 +1043,7 @@ function render() {
     zone.appendChild(strip);
 
   } else {
-    zone.style.display = ''; // restaura grid CSS
+    zone.className = 'shelves-zone';
     lv.categories.forEach(cat => {
       const shelf = document.createElement('div');
       shelf.className = 'shelf';
