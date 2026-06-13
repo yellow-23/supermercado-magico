@@ -585,11 +585,95 @@
     }
 
     /* Responsive */
+    /* ---- SORT STRIP (nivel 3) ---- */
+    .sort-strip {
+      background: white;
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 4px 0 #e0d4c8, 0 6px 16px rgba(0,0,0,.08);
+    }
+
+    .sort-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-family: 'Fredoka One', cursive;
+      font-size: .82rem;
+    }
+
+    .sort-header .big-end  { color: #FF922B; }
+    .sort-header .small-end{ color: #20C997; }
+    .sort-arrow { flex:1; text-align:center; color:#ccc; letter-spacing:2px; font-size:.85rem; }
+
+    .sort-slots {
+      display: flex;
+      gap: 7px;
+      align-items: flex-end;
+    }
+
+    .sort-slot {
+      flex: 1;
+      border-radius: 14px;
+      border: 3px dashed #ddd;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color .15s, transform .15s, box-shadow .15s;
+      background: #fafafa;
+      position: relative;
+      gap: 2px;
+    }
+
+    /* altura decreciente = escalera visual */
+    .sort-slot[data-rank="1"] { min-height:108px; border-color:#FF922B55; }
+    .sort-slot[data-rank="2"] { min-height: 98px; border-color:#FFD43B55; }
+    .sort-slot[data-rank="3"] { min-height: 88px; border-color:#A9E34B55; }
+    .sort-slot[data-rank="4"] { min-height: 78px; border-color:#51CF6655; }
+    .sort-slot[data-rank="5"] { min-height: 68px; border-color:#4DABF755; }
+    .sort-slot[data-rank="6"] { min-height: 58px; border-color:#845EF755; }
+
+    .sort-slot:hover { transform: translateY(-3px); }
+
+    .sort-slot.drag-over {
+      border-color: #1565C0;
+      transform: scale(1.06);
+      box-shadow: 0 0 0 3px rgba(21,101,192,.2);
+    }
+
+    .sort-slot.filled {
+      border-style: solid;
+      border-color: #43A047;
+      background: #f0fff4;
+    }
+
+    .sort-slot.correct-flash { animation: flashShelf .55s ease; }
+
+    .slot-num {
+      font-family: 'Fredoka One', cursive;
+      font-size: .7rem;
+      color: #bbb;
+      position: absolute;
+      top: 4px; left: 7px;
+    }
+
+    .slot-item-emoji { font-size: 1.8rem; line-height: 1; }
+    .slot-item-name  { font-size: .55rem; font-weight:900; color:#777; text-align:center; }
+    .slot-dot        { font-size: .5rem; color:#ddd; }
+
     @media (max-width: 460px) {
       .item-card  { width: 70px; }
       .card-emoji { font-size: 2rem; }
       .shelf-name { font-size: .7rem; }
       .start-title { font-size: 2.3rem; }
+      .sort-slot[data-rank="1"] { min-height:90px; }
+      .sort-slot[data-rank="2"] { min-height:82px; }
+      .sort-slot[data-rank="3"] { min-height:74px; }
+      .sort-slot[data-rank="4"] { min-height:66px; }
+      .sort-slot[data-rank="5"] { min-height:58px; }
+      .sort-slot[data-rank="6"] { min-height:50px; }
     }
   </style>
 </head>
@@ -717,7 +801,7 @@
   <p style="font-size:1.1rem;font-weight:700;color:#5D4037">Completaste el Supermercado Magico!</p>
   <div class="go-score-box">
     <div class="go-score-num" id="final-score"></div>
-    <div class="go-score-sub">puntos de 27</div>
+    <div class="go-score-sub">puntos de 24</div>
   </div>
   <button class="btn-replay" id="replay-btn">Jugar de nuevo!</button>
 </div>
@@ -791,24 +875,17 @@ const LEVELS = [
   },
   {
     id: 3,
-    title: "De qué tamaño es?",
-    instr: "Ordena los alimentos según su tamaño",
-    voice: "Nivel tres. De qué tamaño es? Coloca cada alimento en el estante que le corresponde según su tamaño.",
-    categories: [
-      { id:"grande",  label:"Grande",  emoji:"🐘", bg:"#FF922B" },
-      { id:"mediano", label:"Mediano", emoji:"🐱", bg:"#CC5DE8" },
-      { id:"pequeno", label:"Pequeño", emoji:"🐭", bg:"#20C997" }
-    ],
+    mode: 'sort',
+    title: "Ordena por tamaño",
+    instr: "Del más grande al más pequeño — posición 1 es la más grande",
+    voice: "Nivel tres. Ordena los alimentos de mayor a menor tamaño. El número uno es para el más grande.",
     items: [
-      { id:"t_water", emoji:"🍉", name:"Sandia",    cat:"grande"  },
-      { id:"t_pine",  emoji:"🍍", name:"Pina",      cat:"grande"  },
-      { id:"t_pump",  emoji:"🎃", name:"Calabaza",  cat:"grande"  },
-      { id:"t_apple", emoji:"🍎", name:"Manzana",   cat:"mediano" },
-      { id:"t_ora",   emoji:"🍊", name:"Naranja",   cat:"mediano" },
-      { id:"t_pear",  emoji:"🍐", name:"Pera",      cat:"mediano" },
-      { id:"t_cher",  emoji:"🍒", name:"Cerezas",   cat:"pequeno" },
-      { id:"t_grape", emoji:"🍇", name:"Uvas",      cat:"pequeno" },
-      { id:"t_blue",  emoji:"🫐", name:"Arandanos", cat:"pequeno" }
+      { id:"t_pump",  emoji:"🎃", name:"Calabaza",  rank:1 },
+      { id:"t_water", emoji:"🍉", name:"Sandía",    rank:2 },
+      { id:"t_pine",  emoji:"🍍", name:"Piña",      rank:3 },
+      { id:"t_ora",   emoji:"🍊", name:"Naranja",   rank:4 },
+      { id:"t_cher",  emoji:"🍒", name:"Cerezas",   rank:5 },
+      { id:"t_blue",  emoji:"🫐", name:"Arándanos", rank:6 }
     ]
   }
 ];
@@ -912,41 +989,82 @@ function render() {
     grid.appendChild(card);
   });
 
-  // Shelves
+  // Shelves o Sort strip según modo
   const zone = document.getElementById('shelves-zone');
   zone.innerHTML = '';
-  lv.categories.forEach(cat => {
-    const shelf = document.createElement('div');
-    shelf.className = 'shelf';
-    shelf.dataset.cat = cat.id;
 
-    const header = document.createElement('div');
-    header.className = 'shelf-header';
-    header.style.background = cat.bg;
-    header.innerHTML =
-      '<div class="shelf-emoji">' + cat.emoji + '</div>' +
-      '<div class="shelf-name">' + cat.label + '</div>';
+  if (lv.mode === 'sort') {
+    const strip = document.createElement('div');
+    strip.className = 'sort-strip';
+    strip.innerHTML =
+      '<div class="sort-header">' +
+        '<span class="big-end">🐘 Más grande</span>' +
+        '<span class="sort-arrow">→ → → → →</span>' +
+        '<span class="small-end">Más pequeño 🐭</span>' +
+      '</div>';
 
-    const body = document.createElement('div');
-    body.className = 'shelf-body';
+    const slots = document.createElement('div');
+    slots.className = 'sort-slots';
 
-    Object.entries(G.placed).forEach(([iid, cid]) => {
-      if (cid === cat.id) {
-        const it = lv.items.find(x => x.id === iid);
-        if (it) {
-          const el = document.createElement('div');
-          el.className = 'placed-item';
-          el.textContent = it.emoji;
-          body.appendChild(el);
-        }
+    for (let r = 1; r <= lv.items.length; r++) {
+      const slot = document.createElement('div');
+      slot.className = 'sort-slot';
+      slot.dataset.cat = String(r);
+      slot.dataset.rank = String(r);
+
+      const placed = Object.entries(G.placed).find(([, rank]) => parseInt(rank) === r);
+      if (placed) {
+        const it = lv.items.find(x => x.id === placed[0]);
+        slot.classList.add('filled');
+        slot.innerHTML =
+          '<div class="slot-num">' + r + '</div>' +
+          '<div class="slot-item-emoji">' + it.emoji + '</div>' +
+          '<div class="slot-item-name">' + it.name + '</div>';
+      } else {
+        slot.innerHTML = '<div class="slot-num">' + r + '</div><div class="slot-dot">●</div>';
       }
-    });
 
-    shelf.appendChild(header);
-    shelf.appendChild(body);
-    shelf.addEventListener('click', () => { if (!dragMoved) onShelfClick(cat.id); });
-    zone.appendChild(shelf);
-  });
+      slot.addEventListener('click', () => { if (!dragMoved) onShelfClick(String(r)); });
+      slots.appendChild(slot);
+    }
+
+    strip.appendChild(slots);
+    zone.appendChild(strip);
+
+  } else {
+    lv.categories.forEach(cat => {
+      const shelf = document.createElement('div');
+      shelf.className = 'shelf';
+      shelf.dataset.cat = cat.id;
+
+      const header = document.createElement('div');
+      header.className = 'shelf-header';
+      header.style.background = cat.bg;
+      header.innerHTML =
+        '<div class="shelf-emoji">' + cat.emoji + '</div>' +
+        '<div class="shelf-name">' + cat.label + '</div>';
+
+      const body = document.createElement('div');
+      body.className = 'shelf-body';
+
+      Object.entries(G.placed).forEach(([iid, cid]) => {
+        if (cid === cat.id) {
+          const it = lv.items.find(x => x.id === iid);
+          if (it) {
+            const el = document.createElement('div');
+            el.className = 'placed-item';
+            el.textContent = it.emoji;
+            body.appendChild(el);
+          }
+        }
+      });
+
+      shelf.appendChild(header);
+      shelf.appendChild(body);
+      shelf.addEventListener('click', () => { if (!dragMoved) onShelfClick(cat.id); });
+      zone.appendChild(shelf);
+    });
+  }
 }
 
 function fb(msg, type) {
@@ -982,8 +1100,8 @@ document.addEventListener('pointermove', e => {
     ghost.style.left = e.clientX + 'px';
     ghost.style.top  = e.clientY + 'px';
     const el = document.elementFromPoint(e.clientX, e.clientY);
-    const shelf = el?.closest('.shelf');
-    document.querySelectorAll('.shelf').forEach(s => s.classList.remove('drag-over'));
+    const shelf = el?.closest('.shelf, .sort-slot');
+    document.querySelectorAll('.shelf, .sort-slot').forEach(s => s.classList.remove('drag-over'));
     if (shelf) shelf.classList.add('drag-over');
   }
 });
@@ -995,7 +1113,7 @@ document.addEventListener('pointerup', e => {
 
   if (dragMoved) {
     const el = document.elementFromPoint(e.clientX, e.clientY);
-    const shelf = el?.closest('.shelf');
+    const shelf = el?.closest('.shelf, .sort-slot');
     if (shelf) tryPlace(drag.id, shelf.dataset.cat);
     else { G.selected = null; render(); }
   } else {
@@ -1031,24 +1149,39 @@ function tryPlace(itemId, catId) {
   const item = lv.items.find(x => x.id === itemId);
   if (!item) return;
 
-  if (item.cat === catId) {
+  const isSort = lv.mode === 'sort';
+  const correct = isSort ? item.rank === parseInt(catId) : item.cat === catId;
+
+  if (correct) {
     G.placed[itemId] = catId;
     G.score++;
     G.selected = null;
     document.getElementById('score-display').textContent = G.score;
     sfx.correct();
-    const cat = lv.categories.find(c => c.id === catId);
-    fb('Muy bien! ' + item.emoji + ' ' + item.name + ' va en ' + cat.label + '! ✅', 'correct');
-    speak('Muy bien! ' + item.name + ' va en ' + cat.label);
+    if (isSort) {
+      fb('¡Correcto! ' + item.emoji + ' ' + item.name + ' va en la posición ' + item.rank + ' ✅', 'correct');
+      speak('Correcto! ' + item.name + ' va en la posición ' + item.rank);
+    } else {
+      const cat = lv.categories.find(c => c.id === catId);
+      fb('Muy bien! ' + item.emoji + ' ' + item.name + ' va en ' + cat.label + '! ✅', 'correct');
+      speak('Muy bien! ' + item.name + ' va en ' + cat.label);
+    }
     render();
-    const shelf = document.querySelector('[data-cat="' + catId + '"]');
-    if (shelf) { shelf.classList.add('correct-flash'); setTimeout(() => shelf.classList.remove('correct-flash'), 550); }
+    const target = document.querySelector('[data-cat="' + catId + '"]');
+    if (target) { target.classList.add('correct-flash'); setTimeout(() => target.classList.remove('correct-flash'), 550); }
     if (Object.keys(G.placed).length === lv.items.length) setTimeout(levelDone, 850);
   } else {
     sfx.wrong();
-    const correctCat = lv.categories.find(c => c.id === item.cat);
-    fb('Intentalo de nuevo! ' + item.emoji + ' ' + item.name + ' va en ' + correctCat.emoji + ' ' + correctCat.label + ' 🤔', 'wrong');
-    speak('Intentalo de nuevo. ' + item.name + ' va en ' + correctCat.label);
+    if (isSort) {
+      const slotRank = parseInt(catId);
+      const hint = item.rank < slotRank ? 'es más grande, ponlo más a la izquierda' : 'es más pequeño, ponlo más a la derecha';
+      fb('¡Inténtalo de nuevo! ' + item.emoji + ' ' + item.name + ' ' + hint + ' 🤔', 'wrong');
+      speak('Inténtalo de nuevo. ' + item.name + ' ' + hint);
+    } else {
+      const correctCat = lv.categories.find(c => c.id === item.cat);
+      fb('Intentalo de nuevo! ' + item.emoji + ' ' + item.name + ' va en ' + correctCat.emoji + ' ' + correctCat.label + ' 🤔', 'wrong');
+      speak('Intentalo de nuevo. ' + item.name + ' va en ' + correctCat.label);
+    }
     const card = document.querySelector('[data-id="' + itemId + '"]');
     if (card) { card.classList.add('shake'); setTimeout(() => card.classList.remove('shake'), 450); }
     G.selected = null;
