@@ -636,13 +636,13 @@
       gap: 2px;
     }
 
-    /* altura decreciente = escalera visual */
-    .sort-slot[data-rank="1"] { min-height:108px; border-color:#FF922B55; }
-    .sort-slot[data-rank="2"] { min-height: 98px; border-color:#FFD43B55; }
-    .sort-slot[data-rank="3"] { min-height: 88px; border-color:#A9E34B55; }
-    .sort-slot[data-rank="4"] { min-height: 78px; border-color:#51CF6655; }
-    .sort-slot[data-rank="5"] { min-height: 68px; border-color:#4DABF755; }
-    .sort-slot[data-rank="6"] { min-height: 58px; border-color:#845EF755; }
+    /* altura creciente = escalera visual (pequeño→grande) */
+    .sort-slot[data-rank="1"] { min-height: 58px; border-color:#845EF755; }
+    .sort-slot[data-rank="2"] { min-height: 68px; border-color:#4DABF755; }
+    .sort-slot[data-rank="3"] { min-height: 78px; border-color:#51CF6655; }
+    .sort-slot[data-rank="4"] { min-height: 88px; border-color:#A9E34B55; }
+    .sort-slot[data-rank="5"] { min-height: 98px; border-color:#FFD43B55; }
+    .sort-slot[data-rank="6"] { min-height:108px; border-color:#FF922B55; }
 
     .sort-slot:hover { transform: translateY(-3px); }
 
@@ -677,12 +677,12 @@
       .card-emoji { font-size: 2rem; }
       .shelf-name { font-size: .7rem; }
       .start-title { font-size: 2.3rem; }
-      .sort-slot[data-rank="1"] { min-height:90px; }
-      .sort-slot[data-rank="2"] { min-height:82px; }
-      .sort-slot[data-rank="3"] { min-height:74px; }
-      .sort-slot[data-rank="4"] { min-height:66px; }
-      .sort-slot[data-rank="5"] { min-height:58px; }
-      .sort-slot[data-rank="6"] { min-height:50px; }
+      .sort-slot[data-rank="1"] { min-height:50px; }
+      .sort-slot[data-rank="2"] { min-height:58px; }
+      .sort-slot[data-rank="3"] { min-height:66px; }
+      .sort-slot[data-rank="4"] { min-height:74px; }
+      .sort-slot[data-rank="5"] { min-height:82px; }
+      .sort-slot[data-rank="6"] { min-height:90px; }
     }
   </style>
 </head>
@@ -886,15 +886,15 @@ const LEVELS = [
     id: 3,
     mode: 'sort',
     title: "Ordena por tamaño",
-    instr: "Del más grande al más pequeño — posición 1 es la más grande",
-    voice: "Nivel tres. Ordena los alimentos de mayor a menor tamaño. El número uno es para el más grande.",
+    instr: "Del más pequeño al más grande — posición 1 es la más pequeña",
+    voice: "Nivel tres. Ordena los alimentos de menor a mayor tamaño. El número uno es para el más pequeño.",
     items: [
-      { id:"t_pump",  emoji:"🎃", name:"Calabaza",  rank:1 },
-      { id:"t_water", emoji:"🍉", name:"Sandía",    rank:2 },
-      { id:"t_pine",  emoji:"🍍", name:"Piña",      rank:3 },
-      { id:"t_ora",   emoji:"🍊", name:"Naranja",   rank:4 },
-      { id:"t_cher",  emoji:"🍒", name:"Cerezas",   rank:5 },
-      { id:"t_blue",  emoji:"🫐", name:"Arándanos", rank:6 }
+      { id:"t_blue",  emoji:"🫐", name:"Arándanos", rank:1 },
+      { id:"t_cher",  emoji:"🍒", name:"Cerezas",   rank:2 },
+      { id:"t_ora",   emoji:"🍊", name:"Naranja",   rank:3 },
+      { id:"t_pine",  emoji:"🍍", name:"Piña",      rank:4 },
+      { id:"t_water", emoji:"🍉", name:"Sandía",    rank:5 },
+      { id:"t_pump",  emoji:"🎃", name:"Calabaza",  rank:6 }
     ]
   }
 ];
@@ -1009,9 +1009,9 @@ function render() {
     strip.className = 'sort-strip';
     strip.innerHTML =
       '<div class="sort-header">' +
-        '<span class="big-end">🐘&nbsp;Más grande</span>' +
+        '<span class="small-end">🐭&nbsp;Más pequeño</span>' +
         '<span class="sort-arrow">→&nbsp;→&nbsp;→&nbsp;→&nbsp;→</span>' +
-        '<span class="small-end">Más pequeño&nbsp;🐭</span>' +
+        '<span class="big-end">Más grande&nbsp;🐘</span>' +
       '</div>';
 
     const slots = document.createElement('div');
@@ -1186,7 +1186,7 @@ function tryPlace(itemId, catId) {
     sfx.wrong();
     if (isSort) {
       const slotRank = parseInt(catId);
-      const hint = item.rank < slotRank ? 'es más grande, ponlo más a la izquierda' : 'es más pequeño, ponlo más a la derecha';
+      const hint = item.rank > slotRank ? 'es más grande, ponlo más a la derecha' : 'es más pequeño, ponlo más a la izquierda';
       fb('¡Inténtalo de nuevo! ' + item.emoji + ' ' + item.name + ' ' + hint + ' 🤔', 'wrong');
       speak('Inténtalo de nuevo. ' + item.name + ' ' + hint);
     } else {
