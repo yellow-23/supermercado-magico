@@ -817,6 +817,8 @@ body {
   background: #EFF6FF;
 }
 
+.spatial-cell.drag-over { background: #D1FAE5; border-color: #34D399; transform: scale(1.04); }
+
 .spatial-cell.correct-flash { animation: flashShelf .55s ease; }
 
 .spatial-cell.shake { animation: shake .45s ease; }

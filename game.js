@@ -274,11 +274,19 @@ function render() {
       document.getElementById('level-instr').textContent = step.text;
       itemsZone.style.display = '';
       document.querySelector('.zone-title').textContent = 'Coloca este alimento:';
-      grid.innerHTML =
-        '<div class="spatial-current-item">' +
-          '<div class="spatial-current-emoji">' + step.itemEmoji + '</div>' +
-          '<div class="card-name" style="font-size:.75rem;margin-top:4px">' + step.itemName + '</div>' +
-        '</div>';
+      grid.innerHTML = '';
+      const spatialItemDiv = document.createElement('div');
+      spatialItemDiv.className = 'spatial-current-item';
+      spatialItemDiv.innerHTML =
+        '<div class="spatial-current-emoji">' + step.itemEmoji + '</div>' +
+        '<div class="card-name" style="font-size:.75rem;margin-top:4px">' + step.itemName + '</div>';
+      spatialItemDiv.addEventListener('pointerdown', e => {
+        e.preventDefault(); e.stopPropagation();
+        drag = { isSpatial: true, emoji: step.itemEmoji, sx: e.clientX, sy: e.clientY };
+        dragMoved = false;
+        e.currentTarget.setPointerCapture(e.pointerId);
+      });
+      grid.appendChild(spatialItemDiv);
     } else {
       document.getElementById('level-instr').textContent = lv.instr;
       itemsZone.style.display = 'none';
@@ -462,34 +470,52 @@ document.addEventListener('pointermove', e => {
   if (!drag) return;
   if (!dragMoved && (Math.abs(e.clientX - drag.sx) > 6 || Math.abs(e.clientY - drag.sy) > 6)) {
     dragMoved = true;
-    const item = LEVELS[G.level].items.find(x => x.id === drag.id);
-    ghost.textContent = item.emoji;
+    if (drag.isSpatial) {
+      ghost.textContent = drag.emoji;
+    } else {
+      const item = LEVELS[G.level].items.find(x => x.id === drag.id);
+      ghost.textContent = item.emoji;
+      G.selected = drag.id;
+      render();
+    }
     ghost.style.display = 'block';
-    G.selected = drag.id;
-    render();
   }
   if (dragMoved) {
     ghost.style.left = e.clientX + 'px';
     ghost.style.top  = e.clientY + 'px';
     const el = document.elementFromPoint(e.clientX, e.clientY);
-    const shelf = el?.closest('.shelf, .sort-slot');
-    document.querySelectorAll('.shelf, .sort-slot').forEach(s => s.classList.remove('drag-over'));
-    if (shelf) shelf.classList.add('drag-over');
+    const target = el?.closest('.shelf, .sort-slot, .spatial-cell');
+    document.querySelectorAll('.shelf, .sort-slot, .spatial-cell').forEach(s => s.classList.remove('drag-over'));
+    if (target) {
+      const isCell = target.classList.contains('spatial-cell');
+      if (!isCell || (!target.classList.contains('filled') && !target.classList.contains('anchor'))) {
+        target.classList.add('drag-over');
+      }
+    }
   }
 });
 
 document.addEventListener('pointerup', e => {
   if (!drag) return;
   ghost.style.display = 'none';
-  document.querySelectorAll('.shelf').forEach(s => s.classList.remove('drag-over'));
+  document.querySelectorAll('.shelf, .sort-slot, .spatial-cell').forEach(s => s.classList.remove('drag-over'));
 
   if (dragMoved) {
     const el = document.elementFromPoint(e.clientX, e.clientY);
-    const shelf = el?.closest('.shelf, .sort-slot');
-    if (shelf) tryPlace(drag.id, shelf.dataset.cat);
-    else { G.selected = null; render(); }
+    if (drag.isSpatial) {
+      const cell = el?.closest('.spatial-cell');
+      if (cell && !cell.classList.contains('filled') && !cell.classList.contains('anchor')) {
+        placeSpatial(parseInt(cell.dataset.row), parseInt(cell.dataset.col));
+      } else {
+        render();
+      }
+    } else {
+      const shelf = el?.closest('.shelf, .sort-slot');
+      if (shelf) tryPlace(drag.id, shelf.dataset.cat);
+      else { G.selected = null; render(); }
+    }
   } else {
-    selectItem(drag.id);
+    if (!drag.isSpatial) selectItem(drag.id);
   }
   drag = null;
 });
