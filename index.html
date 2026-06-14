@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>La Mision del Supermercado Magico</title>
+  <title>La Gran Mision del Supermercado</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -50,7 +50,7 @@
   <div class="start-cart">🛒</div>
 
   <h1 class="start-title">
-    La Mision del<br>
+    La Gran Mision del<br>
     <span class="title-yellow">Supermercado</span><br>
     <span class="title-teal">Magico</span>
   </h1>
@@ -61,6 +61,8 @@
     <span class="level-pill">Nivel 1: Tipo de alimento</span>
     <span class="level-pill">Nivel 2: Color</span>
     <span class="level-pill">Nivel 3: Tamaño</span>
+    <span class="level-pill">Nivel 4: Conteo</span>
+    <span class="level-pill">Nivel 5: Espacial</span>
   </div>
 
   <button class="btn-start" id="start-btn">Comenzar</button>
@@ -97,13 +99,16 @@
     </div>
 
     <!-- Items -->
-    <div class="items-zone">
+    <div class="items-zone" id="items-zone">
       <div class="zone-title">Alimentos para clasificar</div>
       <div class="items-grid" id="items-grid"></div>
     </div>
 
     <!-- Shelves -->
     <div class="shelves-zone" id="shelves-zone"></div>
+
+    <!-- Question zone (nivel 4 conteo) -->
+    <div id="question-zone" style="display:none"></div>
 
     <!-- Feedback -->
     <div class="feedback" id="feedback">
@@ -132,7 +137,7 @@
   <p style="font-size:1.1rem;font-weight:700;color:#5D4037">Completaste el Supermercado Magico!</p>
   <div class="go-score-box">
     <div class="go-score-num" id="final-score"></div>
-    <div class="go-score-sub">puntos de 24</div>
+    <div class="go-score-sub">puntos de 34</div>
   </div>
   <button class="btn-replay" id="replay-btn">Jugar de nuevo!</button>
 </div>

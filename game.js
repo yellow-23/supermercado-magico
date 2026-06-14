@@ -75,13 +75,53 @@ const LEVELS = [
       { id:"t_water", emoji:"🍉", name:"Sandía",    rank:5 },
       { id:"t_pump",  emoji:"🎃", name:"Calabaza",  rank:6 }
     ]
+  },
+  {
+    id: 4,
+    mode: 'count',
+    title: "¿Cuántos hay?",
+    instr: "Cuenta los productos y responde las preguntas",
+    voice: "Nivel cuatro. Cuenta los productos en cada estante y responde las preguntas.",
+    shelves: [
+      { id:"frutas",   label:"Frutas",   emoji:"🍓", bg:"#FF6B6B", items:["🍎","🍌","🍇","🍊"]   },
+      { id:"verduras", label:"Verduras", emoji:"🥬", bg:"#51CF66", items:["🥕","🥦"]             },
+      { id:"lacteos",  label:"Lácteos",  emoji:"🐄", bg:"#4DABF7", items:["🥛","🧀","🍶"]        }
+    ],
+    questions: [
+      { text:"¿Cuántas frutas hay?",                   answer:4,         options:[2,3,4,5],                        type:'count', shelf:'frutas'   },
+      { text:"¿Cuántas verduras hay?",                 answer:2,         options:[1,2,3,4],                        type:'count', shelf:'verduras' },
+      { text:"¿Cuántos lácteos hay?",                  answer:3,         options:[2,3,4,5],                        type:'count', shelf:'lacteos'  },
+      { text:"¿En qué estante hay más productos?",     answer:"frutas",  options:["frutas","verduras","lacteos"],   type:'most'                   },
+      { text:"¿En qué estante hay menos productos?",   answer:"verduras",options:["frutas","verduras","lacteos"],   type:'least'                  }
+    ]
+  },
+  {
+    id: 5,
+    mode: 'spatial',
+    title: "Relaciones espaciales",
+    instr: "Sigue las instrucciones para colocar los alimentos",
+    voice: "Nivel cinco. Escucha las instrucciones y coloca cada alimento en el lugar correcto.",
+    // Grid 2 rows x 3 cols. row 0 = arriba, row 1 = abajo. col 0=izq, 1=centro, 2=der
+    anchors: [
+      { emoji:"🥛", name:"Leche", row:0, col:1 }
+    ],
+    steps: [
+      { itemEmoji:"🧀", itemName:"Queso",     text:"Coloca el queso debajo de la leche",           voice:"Coloca el queso debajo de la leche",           row:1, col:1 },
+      { itemEmoji:"🍎", itemName:"Manzana",   text:"Coloca la manzana a la izquierda de la leche", voice:"Coloca la manzana a la izquierda de la leche", row:0, col:0 },
+      { itemEmoji:"🍌", itemName:"Plátano",   text:"Coloca el plátano a la derecha de la leche",   voice:"Coloca el plátano a la derecha de la leche",   row:0, col:2 },
+      { itemEmoji:"🥕", itemName:"Zanahoria", text:"Coloca la zanahoria a la izquierda del queso", voice:"Coloca la zanahoria a la izquierda del queso", row:1, col:0 },
+      { itemEmoji:"🥦", itemName:"Brócoli",   text:"Coloca el brócoli a la derecha del queso",     voice:"Coloca el brócoli a la derecha del queso",     row:1, col:2 }
+    ]
   }
 ];
 
 // ============================================================
 // STATE
 // ============================================================
-let G = { level:0, score:0, placed:{}, selected:null, audio:null, itemOrder:[] };
+let G = {
+  level:0, score:0, placed:{}, selected:null, audio:null, itemOrder:[],
+  currentQuestion:0, currentStep:0, grid:null
+};
 let drag = null;
 let dragMoved = false;
 
@@ -147,17 +187,159 @@ function show(id) {
 function render() {
   const lv = LEVELS[G.level];
 
-  document.getElementById('level-badge').textContent  = 'Nivel ' + lv.id;
+  document.getElementById('level-badge').textContent   = 'Nivel ' + lv.id;
   document.getElementById('score-display').textContent = G.score;
   document.getElementById('level-title').textContent   = lv.title;
-  document.getElementById('level-instr').textContent   = lv.instr;
 
-  const done = Object.keys(G.placed).length;
-  document.getElementById('prog-text').textContent = done + ' / ' + lv.items.length;
-  document.getElementById('prog-fill').style.width = (done / lv.items.length * 100) + '%';
+  // Progress
+  let done, total;
+  if      (lv.mode === 'count')   { done = G.currentQuestion; total = lv.questions.length; }
+  else if (lv.mode === 'spatial') { done = G.currentStep;     total = lv.steps.length;     }
+  else                            { done = Object.keys(G.placed).length; total = lv.items.length; }
+  document.getElementById('prog-text').textContent = done + ' / ' + total;
+  document.getElementById('prog-fill').style.width = (done / total * 100) + '%';
 
-  // Items (en orden aleatorio fijado al inicio del nivel)
-  const grid = document.getElementById('items-grid');
+  const itemsZone = document.getElementById('items-zone');
+  const qzone     = document.getElementById('question-zone');
+  const grid      = document.getElementById('items-grid');
+  const zone      = document.getElementById('shelves-zone');
+
+  // ---- COUNT MODE ----
+  if (lv.mode === 'count') {
+    document.getElementById('level-instr').textContent = lv.instr;
+    itemsZone.style.display = 'none';
+    qzone.style.display     = '';
+
+    // Pre-filled shelves
+    zone.className = 'count-shelves';
+    zone.innerHTML = '';
+    lv.shelves.forEach(shelf => {
+      const el = document.createElement('div');
+      el.className = 'count-shelf';
+
+      const header = document.createElement('div');
+      header.className = 'count-shelf-header';
+      header.style.background = shelf.bg;
+      header.innerHTML =
+        '<div style="font-size:1.5rem">' + shelf.emoji + '</div>' +
+        '<div class="shelf-name">' + shelf.label + '</div>';
+
+      const body = document.createElement('div');
+      body.className = 'count-shelf-items';
+      shelf.items.forEach(em => {
+        const s = document.createElement('span');
+        s.className = 'count-shelf-item';
+        s.textContent = em;
+        body.appendChild(s);
+      });
+
+      el.appendChild(header);
+      el.appendChild(body);
+      zone.appendChild(el);
+    });
+
+    // Question + options
+    const q = lv.questions[G.currentQuestion];
+    qzone.innerHTML = '';
+
+    const qcard = document.createElement('div');
+    qcard.className = 'question-card';
+    qcard.innerHTML = '<div class="question-text">' + q.text + '</div>';
+    qzone.appendChild(qcard);
+
+    const opts = document.createElement('div');
+    opts.className = 'answer-options';
+    shuffle([...q.options]).forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'answer-btn';
+      if (q.type === 'count') {
+        btn.textContent = opt;
+      } else {
+        const shelf = lv.shelves.find(s => s.id === opt);
+        btn.innerHTML = shelf.emoji + ' ' + shelf.label;
+      }
+      btn.addEventListener('click', () => answerCount(opt));
+      opts.appendChild(btn);
+    });
+    qzone.appendChild(opts);
+    return;
+  }
+
+  // ---- SPATIAL MODE ----
+  if (lv.mode === 'spatial') {
+    qzone.style.display = 'none';
+
+    if (G.currentStep < lv.steps.length) {
+      const step = lv.steps[G.currentStep];
+      document.getElementById('level-instr').textContent = step.text;
+      itemsZone.style.display = '';
+      document.querySelector('.zone-title').textContent = 'Coloca este alimento:';
+      grid.innerHTML =
+        '<div class="spatial-current-item">' +
+          '<div class="spatial-current-emoji">' + step.itemEmoji + '</div>' +
+          '<div class="card-name" style="font-size:.75rem;margin-top:4px">' + step.itemName + '</div>' +
+        '</div>';
+    } else {
+      document.getElementById('level-instr').textContent = lv.instr;
+      itemsZone.style.display = 'none';
+    }
+
+    // Spatial grid
+    zone.className = 'spatial-zone';
+    zone.innerHTML = '';
+
+    const shelfWrap = document.createElement('div');
+    shelfWrap.className = 'spatial-shelf';
+
+    for (let row = 0; row < 2; row++) {
+      const rowLabel = document.createElement('div');
+      rowLabel.className = 'spatial-row-label';
+      rowLabel.textContent = row === 0 ? '⬆️  Estante de arriba' : '⬇️  Estante de abajo';
+      shelfWrap.appendChild(rowLabel);
+
+      const rowEl = document.createElement('div');
+      rowEl.className = 'spatial-row';
+
+      for (let col = 0; col < 3; col++) {
+        const cell = document.createElement('div');
+        cell.className = 'spatial-cell';
+        cell.dataset.row = row;
+        cell.dataset.col = col;
+
+        const anchor = lv.anchors.find(a => a.row === row && a.col === col);
+        const placed = G.grid[row][col];
+
+        if (anchor) {
+          cell.classList.add('filled', 'anchor');
+          cell.innerHTML =
+            '<div class="cell-emoji">' + anchor.emoji + '</div>' +
+            '<div class="cell-name">' + anchor.name + '</div>';
+        } else if (placed) {
+          cell.classList.add('filled');
+          cell.innerHTML =
+            '<div class="cell-emoji">' + placed.itemEmoji + '</div>' +
+            '<div class="cell-name">' + placed.itemName + '</div>';
+        } else {
+          cell.innerHTML = '<div class="slot-dot">●</div>';
+          if (G.currentStep < lv.steps.length) {
+            cell.addEventListener('click', () => placeSpatial(row, col));
+          }
+        }
+        rowEl.appendChild(cell);
+      }
+      shelfWrap.appendChild(rowEl);
+    }
+    zone.appendChild(shelfWrap);
+    return;
+  }
+
+  // ---- DEFAULT: CLASSIFY / SORT MODES ----
+  document.getElementById('level-instr').textContent = lv.instr;
+  itemsZone.style.display = '';
+  qzone.style.display     = 'none';
+  document.querySelector('.zone-title').textContent = 'Alimentos para clasificar';
+
+  // Items grid
   grid.innerHTML = '';
   const orderedItems = G.itemOrder.map(id => lv.items.find(x => x.id === id));
   orderedItems.forEach(item => {
@@ -178,7 +360,6 @@ function render() {
   });
 
   // Shelves o Sort strip segun modo
-  const zone = document.getElementById('shelves-zone');
   zone.innerHTML = '';
 
   if (lv.mode === 'sort') {
@@ -314,7 +495,7 @@ document.addEventListener('pointerup', e => {
 });
 
 // ============================================================
-// LOGIC
+// LOGIC — classify / sort (niveles 1-3)
 // ============================================================
 function selectItem(id) {
   if (G.placed[id]) return;
@@ -380,6 +561,94 @@ function tryPlace(itemId, catId) {
   }
 }
 
+// ============================================================
+// LOGIC — count (nivel 4)
+// ============================================================
+function answerCount(answer) {
+  const lv = LEVELS[G.level];
+  const q  = lv.questions[G.currentQuestion];
+  // eslint-disable-next-line eqeqeq
+  const correct = answer == q.answer;
+
+  if (correct) {
+    G.score++;
+    document.getElementById('score-display').textContent = G.score;
+    sfx.correct();
+    if (q.type === 'count') {
+      const shelf = lv.shelves.find(s => s.id === q.shelf);
+      fb('¡Correcto! Hay ' + q.answer + ' ' + shelf.label.toLowerCase() + ' ✅', 'correct');
+      speak('Correcto! Hay ' + q.answer + ' ' + shelf.label);
+    } else if (q.type === 'most') {
+      const shelf = lv.shelves.find(s => s.id === q.answer);
+      fb('¡Correcto! En ' + shelf.label + ' hay más productos ✅', 'correct');
+      speak('Correcto! En ' + shelf.label + ' hay más productos');
+    } else {
+      const shelf = lv.shelves.find(s => s.id === q.answer);
+      fb('¡Correcto! En ' + shelf.label + ' hay menos productos ✅', 'correct');
+      speak('Correcto! En ' + shelf.label + ' hay menos productos');
+    }
+    G.currentQuestion++;
+    if (G.currentQuestion >= lv.questions.length) {
+      setTimeout(levelDone, 850);
+    } else {
+      setTimeout(() => {
+        render();
+        speak(lv.questions[G.currentQuestion].text);
+      }, 750);
+    }
+  } else {
+    sfx.wrong();
+    if (q.type === 'count') {
+      fb('¡Inténtalo de nuevo! Cuenta bien los productos 🤔', 'wrong');
+    } else {
+      fb('¡Inténtalo de nuevo! Mira bien los estantes 🤔', 'wrong');
+    }
+    speak('Inténtalo de nuevo');
+  }
+}
+
+// ============================================================
+// LOGIC — spatial (nivel 5)
+// ============================================================
+function placeSpatial(row, col) {
+  const lv = LEVELS[G.level];
+  if (G.currentStep >= lv.steps.length) return;
+
+  const step    = lv.steps[G.currentStep];
+  const correct = row === step.row && col === step.col;
+
+  if (correct) {
+    G.grid[row][col] = step;
+    G.score++;
+    document.getElementById('score-display').textContent = G.score;
+    sfx.correct();
+    fb('¡Muy bien! ' + step.itemEmoji + ' ' + step.itemName + ' va ahí ✅', 'correct');
+    speak('Muy bien! ' + step.itemName + ' va ahí');
+
+    const cell = document.querySelector('[data-row="' + row + '"][data-col="' + col + '"]');
+    if (cell) { cell.classList.add('correct-flash'); setTimeout(() => cell.classList.remove('correct-flash'), 550); }
+
+    G.currentStep++;
+    if (G.currentStep >= lv.steps.length) {
+      setTimeout(levelDone, 850);
+    } else {
+      setTimeout(() => {
+        render();
+        speak(lv.steps[G.currentStep].voice);
+      }, 750);
+    }
+  } else {
+    sfx.wrong();
+    fb('¡Inténtalo de nuevo! ' + step.text + ' 🤔', 'wrong');
+    speak('Inténtalo de nuevo. ' + step.text);
+    const cell = document.querySelector('[data-row="' + row + '"][data-col="' + col + '"]');
+    if (cell) { cell.classList.add('shake'); setTimeout(() => cell.classList.remove('shake'), 450); }
+  }
+}
+
+// ============================================================
+// LEVEL FLOW
+// ============================================================
 function levelDone() {
   const lv = LEVELS[G.level];
   confetti();
@@ -398,12 +667,37 @@ function levelDone() {
 }
 
 function startLevel(idx) {
-  G.level = idx; G.placed = {}; G.selected = null;
-  G.itemOrder = shuffle(LEVELS[idx].items.map(x => x.id));
+  const lv = LEVELS[idx];
+  G.level           = idx;
+  G.placed          = {};
+  G.selected        = null;
+  G.currentQuestion = 0;
+  G.currentStep     = 0;
+  G.grid            = [[null,null,null],[null,null,null]];
+  G.itemOrder       = lv.items ? shuffle(lv.items.map(x => x.id)) : [];
+  drag              = null;
+  dragMoved         = false;
+
   render();
-  fb('Toca un alimento y luego toca el estante correcto', '');
+
+  if (lv.mode === 'count') {
+    fb('Lee cada pregunta y toca la respuesta correcta', '');
+  } else if (lv.mode === 'spatial') {
+    fb('Escucha la instrucción y toca el lugar correcto en el estante', '');
+  } else {
+    fb('Toca un alimento y luego toca el estante correcto', '');
+  }
+
   show('game-screen');
-  setTimeout(() => speak(LEVELS[idx].voice), 400);
+
+  setTimeout(() => {
+    speak(lv.voice);
+    if (lv.mode === 'count') {
+      setTimeout(() => speak(lv.questions[0].text), 2200);
+    } else if (lv.mode === 'spatial') {
+      setTimeout(() => speak(lv.steps[0].voice), 2200);
+    }
+  }, 400);
 }
 
 // ============================================================
@@ -439,18 +733,23 @@ function confetti() {
 // ============================================================
 document.getElementById('start-btn').addEventListener('click', () => {
   initAudio();
-  G = { level:0, score:0, placed:{}, selected:null, audio:G.audio, itemOrder:[] };
+  G = { level:0, score:0, placed:{}, selected:null, audio:G.audio, itemOrder:[],
+        currentQuestion:0, currentStep:0, grid:null };
   startLevel(0);
 });
 
 document.getElementById('speak-btn').addEventListener('click', () => {
-  speak(LEVELS[G.level].voice);
+  const lv = LEVELS[G.level];
+  if      (lv.mode === 'count')   speak(lv.questions[G.currentQuestion]?.text || lv.voice);
+  else if (lv.mode === 'spatial') speak(lv.steps[G.currentStep]?.voice || lv.voice);
+  else                            speak(lv.voice);
 });
 
 document.getElementById('next-btn').addEventListener('click', () => startLevel(G.level + 1));
 
 document.getElementById('replay-btn').addEventListener('click', () => {
-  G = { level:0, score:0, placed:{}, selected:null, audio:G.audio };
+  G = { level:0, score:0, placed:{}, selected:null, audio:G.audio,
+        currentQuestion:0, currentStep:0, grid:null };
   show('start-screen');
 });
 
