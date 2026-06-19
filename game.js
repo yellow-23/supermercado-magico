@@ -11,9 +11,8 @@ const COLORS = {
   s_ban:'#FFD43B', s_lemon:'#F0B429', s_corn:'#FFD43B',
   s_broc:'#51CF66', s_avoc:'#37B24D', s_cuc:'#51CF66',
   // nivel 3
-  t_water:'#FF6B6B', t_pine:'#FFA94D', t_pump:'#FF922B',
-  t_apple:'#FF6B6B', t_ora:'#FF922B', t_pear:'#A9E34B',
-  t_cher:'#C92A2A', t_grape:'#845EF7', t_blue:'#4DABF7'
+  t_s1:'#FF6B6B', t_s2:'#FF6B6B', t_s3:'#FF6B6B',
+  t_s4:'#FF6B6B', t_s5:'#FF6B6B', t_s6:'#FF6B6B'
 };
 
 const LEVELS = [
@@ -68,12 +67,12 @@ const LEVELS = [
     instr: "Del más pequeño al más grande — posición 1 es la más pequeña",
     voice: "Nivel tres. Ordena los alimentos de menor a mayor tamaño. El número uno es para el más pequeño.",
     items: [
-      { id:"t_blue",  emoji:"🫐", name:"Arándanos", rank:1 },
-      { id:"t_cher",  emoji:"🍒", name:"Cerezas",   rank:2 },
-      { id:"t_ora",   emoji:"🍊", name:"Naranja",   rank:3 },
-      { id:"t_pine",  emoji:"🍍", name:"Piña",      rank:4 },
-      { id:"t_water", emoji:"🍉", name:"Sandía",    rank:5 },
-      { id:"t_pump",  emoji:"🎃", name:"Calabaza",  rank:6 }
+      { id:"t_s1", emoji:"🍎", name:"Manzana", rank:1, emojiSize:"0.9rem" },
+      { id:"t_s2", emoji:"🍎", name:"Manzana", rank:2, emojiSize:"1.5rem" },
+      { id:"t_s3", emoji:"🍎", name:"Manzana", rank:3, emojiSize:"2.3rem" },
+      { id:"t_s4", emoji:"🍎", name:"Manzana", rank:4, emojiSize:"3.3rem" },
+      { id:"t_s5", emoji:"🍎", name:"Manzana", rank:5, emojiSize:"4.5rem" },
+      { id:"t_s6", emoji:"🍎", name:"Manzana", rank:6, emojiSize:"5.8rem" }
     ]
   },
   {
@@ -360,8 +359,8 @@ function render() {
     card.innerHTML =
       '<div class="card-stripe" style="background:' + color + '"></div>' +
       '<div class="card-body">' +
-        '<div class="card-emoji">' + item.emoji + '</div>' +
-        '<div class="card-name">' + item.name + '</div>' +
+        '<div class="card-emoji"' + (item.emojiSize ? ' style="font-size:' + item.emojiSize + '"' : '') + '>' + item.emoji + '</div>' +
+        (item.emojiSize ? '' : '<div class="card-name">' + item.name + '</div>') +
       '</div>';
     card.addEventListener('pointerdown', e => onItemDown(e, item.id));
     grid.appendChild(card);
@@ -397,8 +396,7 @@ function render() {
         slot.classList.add('filled');
         slot.innerHTML =
           '<div class="slot-num">' + r + '</div>' +
-          '<div class="slot-item-emoji">' + it.emoji + '</div>' +
-          '<div class="slot-item-name">' + it.name + '</div>';
+          '<div class="slot-item-emoji"' + (it.emojiSize ? ' style="font-size:' + it.emojiSize + '"' : '') + '>' + it.emoji + '</div>';
       } else {
         slot.innerHTML = '<div class="slot-num">' + r + '</div><div class="slot-dot">●</div>';
       }
@@ -475,6 +473,7 @@ document.addEventListener('pointermove', e => {
     } else {
       const item = LEVELS[G.level].items.find(x => x.id === drag.id);
       ghost.textContent = item.emoji;
+      ghost.style.fontSize = item.emojiSize || '';
       G.selected = drag.id;
       render();
     }
@@ -772,6 +771,27 @@ document.getElementById('speak-btn').addEventListener('click', () => {
 });
 
 document.getElementById('next-btn').addEventListener('click', () => startLevel(G.level + 1));
+
+// Level picker
+const overlay = document.getElementById('level-picker-overlay');
+const lpButtons = document.getElementById('lp-buttons');
+LEVELS.forEach((lv, idx) => {
+  const btn = document.createElement('button');
+  btn.className = 'lp-level-btn';
+  btn.textContent = 'Nivel ' + lv.id;
+  btn.addEventListener('click', () => {
+    overlay.style.display = 'none';
+    startLevel(idx);
+    show('game-screen');
+  });
+  lpButtons.appendChild(btn);
+});
+document.getElementById('skip-btn').addEventListener('click', () => {
+  overlay.style.display = 'flex';
+});
+document.getElementById('lp-cancel').addEventListener('click', () => {
+  overlay.style.display = 'none';
+});
 
 document.getElementById('replay-btn').addEventListener('click', () => {
   G = { level:0, score:0, placed:{}, selected:null, audio:G.audio,

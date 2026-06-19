@@ -76,6 +76,7 @@
     <!-- Store header -->
     <div class="store-header">
       <div class="store-flag" id="level-badge">Nivel 1</div>
+      <button class="skip-btn" id="skip-btn" title="Saltar nivel">⏭</button>
       <div class="store-name">La Gran Mision del Supermercado 🛒</div>
       <div style="display:flex;align-items:center;gap:6px;padding-right:12px;">
         <button class="speak-btn" id="speak-btn" title="Escuchar instruccion">🔊</button>
@@ -139,6 +140,15 @@
     <div class="go-score-sub">puntos de 34</div>
   </div>
   <button class="btn-replay" id="replay-btn">Jugar de nuevo!</button>
+</div>
+
+<!-- Level picker modal -->
+<div id="level-picker-overlay" style="display:none">
+  <div id="level-picker">
+    <div class="lp-title">Ir al nivel</div>
+    <div id="lp-buttons"></div>
+    <button id="lp-cancel">Cancelar</button>
+  </div>
 </div>
 
 <script src="game.js"></script>
